@@ -17,10 +17,6 @@ const orderSchema = new Schema(({
     orderContents:[
         {
             required: true,
-            imageFile:{
-                type: String,
-                required: true
-            },
             name:{
                 type: String,
                 required: true
@@ -52,13 +48,13 @@ const orderSchema = new Schema(({
         }
     ],
     comments: String,
-    delivery: {
-        type: Boolean,
+    deliveryType: {
+        type: String,
         default: true
     },
-    completed: {
-        type: Boolean,
-        default: false
+    status: {
+        type: String,
+        default: 'Pending'
     }
 
 }));

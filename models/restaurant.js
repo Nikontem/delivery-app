@@ -16,60 +16,6 @@ const restaurantSchema = new Schema({
     },
     minimumCharge:{
         type: Number,
-    },
-    menu:{
-        required: true,
-        entries: [
-            {
-                categoryName: {
-                    type: String,
-                    required: true,
-                    index: true,
-                    unique: true
-                },
-                items: [
-                    {
-                        required: true,
-                        _id: {
-                            type: Schema.Types.ObjectId,
-                            required: true,
-                            index: true
-                        },
-                        imageFile:{
-                            type: String,
-                            required: true
-                        },
-                        name:{
-                            type: String,
-                            unique: true,
-                            required: true
-                        },
-                        price: {
-                            type: Number,
-                            required: true
-                        }
-                    }
-                ],
-                extraOptions:[
-                    {
-                        _id: {
-                            type: Schema.Types.ObjectId,
-                            required: true,
-                            index: true
-                        },
-                        name:{
-                            type: String,
-                            required: true
-                        },
-                        price: {
-                            type: Number,
-                            required: true
-                        }
-                    }
-                ],
-                required: true
-            }
-        ]
     }
 });
 
