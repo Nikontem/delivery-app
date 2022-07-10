@@ -3,13 +3,20 @@ const createError = require('http-errors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const fs = require('fs');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
 
-app.use(logger('dev'));
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname,'access.log'),
+    {flags: 'a'}
+);
+
+app.use(logger('dev', {skip : function (req, res){return res.status.Code<400}}));
+app.use(logger('combined', {stream: accessLogStream}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

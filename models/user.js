@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     name: {
         type: String,
-        required: false
+        required: true
     },
     lastname: {
         type: String,
-        required: false
+        required: true
     },
     address: {
         street: {
@@ -55,11 +55,11 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    cards: {
+    creditCards: {
         type: String,
         required: true
     },
-    admin: {
+    isAdmin: {
         type: Boolean,
         default: false
     }

@@ -16,7 +16,39 @@ const orderSchema = new Schema(({
     },
     orderContents:[
         {
-
+            required: true,
+            imageFile:{
+                type: String,
+                required: true
+            },
+            name:{
+                type: String,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            },
+            quantity: {
+                type: Number,
+                required: true
+            },
+            extraOptions: [
+                {
+                    quantity: {
+                        type: Number,
+                        required: true
+                    },
+                    name:{
+                        type: String,
+                        required: true
+                    },
+                    price: {
+                        type: Number,
+                        required: true
+                    }
+                }
+            ]
         }
     ],
     comments: String,
