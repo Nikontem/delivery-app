@@ -3,22 +3,21 @@
  */
 const mongoose = require('mongoose');
 const createError = require('http-errors');
-const orderStatus = require('../enums/order-status')
 
-const session = await mongoose.startSession();
 
 
 /**
  * Custom Dependencies
  */
 const Order = require('../models/order');
-const Restaurant = require('../models/restaurant');
 const MenuItem = require('../models/menu-item');
 const ExtraOption = require('../models/extra-option');
 const {operationSuccess} = require("../util/common_reponses");
 const User = require("../models/user");
 
 exports.placeOrder = async (req, res, next) => {
+    const session = await mongoose.startSession();
+
     //Check if a user is logged to retrieve info before
     const order = await createOrder(req.body.order);
     try {

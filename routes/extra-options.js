@@ -4,7 +4,8 @@ const router = express.Router();
 
 router.get('/');
 router.get('/:id');
-router.put('/extra-option');
-router.delete('/extra-option');
+router.delete('/:id');
+router.put('/update-extra-option');
+router.post('/create-extra-option');
 
 module.exports = router;
