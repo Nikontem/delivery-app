@@ -5,14 +5,15 @@ const mongoose = require('mongoose');
 const createError = require('http-errors');
 
 
-
 /**
  * Custom Dependencies
  */
 const Order = require('../models/order');
 const MenuItem = require('../models/menu-item');
 const ExtraOption = require('../models/extra-option');
+const {deliveryStatus} = require('../enums/order-status')
 const {operationSuccess} = require("../util/common_reponses");
+const {pagination} = require('../util/pagination');
 const User = require("../models/user");
 
 exports.placeOrder = async (req, res, next) => {
@@ -37,29 +38,38 @@ exports.getOrders = async (req, res, next) => {
     const perPage = req.query.limit || 10;
     const status = req.query.status;
     const filter = {};
-    if(status){
+    if (status) {
         filter.status = status;
     }
 
     try {
         const totalItems = await Order.find(filter).countDocuments();
         const results = await Order.find(filter).skip((page - 1) * perPage).limit(perPage);
-        return {
+        return operationSuccess(res, {
             orders: results,
             totalItems: totalItems
-        }
-    }catch(error){
+        })
+    } catch (error) {
         next(createError(500, 'Something went wrong with fetching orders' + error));
     }
 }
 
 exports.editOrders = async (req, res, next) => {
-        const jsonOrder = req.body.order;
-        try{
-            await Order.updateOne({jsonOrder});
-        }catch (error){
-            next(createError(500, 'Could not update order '+ error))
-        }
+    const jsonOrder = req.body.order;
+    try {
+        await Order.updateOne({jsonOrder});
+    } catch (error) {
+        next(createError(500, 'Could not update order ' + error))
+    }
+}
+
+exports.markCompleted = async (req, res, next) => {
+    const orderId = req.params.orderId;
+    try {
+        await Order.findOneAndUpdate({_id: orderId}, {status: deliveryStatus.COMPLETED});
+    }catch(error){
+        next(createError(500, 'Something went wrong ' + error));
+    }
 }
 
 const createOrder = async (jsonOrder) => {
@@ -80,10 +90,10 @@ const createOrder = async (jsonOrder) => {
 
     const cartItems = jsonOrder.cartItems;
     const productQuantityMap = new Map();
-    cartItems.forEach( ci => productQuantityMap.set(ci._id, ci));
+    cartItems.forEach(ci => productQuantityMap.set(ci._id, ci));
 
 
-    for(const cartProduct of cartItems){
+    for (const cartProduct of cartItems) {
         try {
             const databaseProduct = await MenuItem.findById(product._id);
             const orderEntry = {...databaseProduct};
@@ -108,7 +118,7 @@ const createOrder = async (jsonOrder) => {
                 }
                 order.orderContents.push(orderEntry);
             }
-        }catch(error){
+        } catch (error) {
             throw Error(error);
         }
     }

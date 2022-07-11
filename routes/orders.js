@@ -7,5 +7,5 @@ router.get('/',orderController.getOrders);
 router.post('/submit-order', orderController.placeOrder);
 //TODO Only for Admin
 router.put('/update-order', orderController.editOrders);
-router.put('/mark-completed');
+router.put('/mark-completed', orderController.markCompleted);
 module.exports = router;
