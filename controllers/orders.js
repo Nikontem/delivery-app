@@ -1,7 +1,6 @@
 /**
  * Module Dependencies
  */
-const mongoose = require('mongoose');
 const createError = require('http-errors');
 
 
@@ -9,33 +8,28 @@ const createError = require('http-errors');
  * Custom Dependencies
  */
 const Order = require('../models/order');
-const MenuItem = require('../models/menu-item');
-const ExtraOption = require('../models/extra-option');
 const {deliveryStatus} = require('../enums/order-status')
 const {operationSuccess} = require("../util/common_reponses");
-const {pagination} = require('../util/pagination');
-const User = require("../models/user");
+const OrderService = require('../service/orders-service');
 
 exports.placeOrder = async (req, res, next) => {
-    const session = await mongoose.startSession();
-
     //Check if a user is logged to retrieve info before
-    const order = await createOrder(req.body.order);
+    const jsonOrder = req.body.order;
+    jsonOrder.userId = req.userId;
     try {
-        await session.withTransaction(async () => {
-            await Order.create([order], {session});
-        });
-        await session.commitTransaction();
-        operationSuccess(res, {_id: order._id, message: 'Order Placed'});
+        const result = OrderService.placeOrder(jsonOrder);
+        operationSuccess(res, result);
     } catch (error) {
-        await session.abortTransaction();
         next(createError(500, 'Placing order failed with error' + error));
     }
 }
 
 exports.getOrders = async (req, res, next) => {
-    const page = req.query.page || 1;
-    const perPage = req.query.limit || 10;
+    const paginateParams = {
+        page: req.query.page || 1,
+        limit: req.query.limit || 10
+    };
+
     const status = req.query.status;
     const filter = {};
     if (status) {
@@ -43,12 +37,8 @@ exports.getOrders = async (req, res, next) => {
     }
 
     try {
-        const totalItems = await Order.find(filter).countDocuments();
-        const results = await Order.find(filter).skip((page - 1) * perPage).limit(perPage);
-        return operationSuccess(res, {
-            orders: results,
-            totalItems: totalItems
-        })
+        const results = OrderService.paginate(filter, paginateParams);
+        operationSuccess(res, results);
     } catch (error) {
         next(createError(500, 'Something went wrong with fetching orders' + error));
     }
@@ -57,7 +47,8 @@ exports.getOrders = async (req, res, next) => {
 exports.editOrders = async (req, res, next) => {
     const jsonOrder = req.body.order;
     try {
-        await Order.updateOne({jsonOrder});
+        await OrderService.createUpdateObject(jsonOrder, 'Order');
+        operationSuccess(res, {});
     } catch (error) {
         next(createError(500, 'Could not update order ' + error))
     }
@@ -66,62 +57,9 @@ exports.editOrders = async (req, res, next) => {
 exports.markCompleted = async (req, res, next) => {
     const orderId = req.params.orderId;
     try {
-        await Order.findOneAndUpdate({_id: orderId}, {status: deliveryStatus.COMPLETED});
-    }catch(error){
+        await OrderService.markCompleted(orderId);
+    } catch (error) {
         next(createError(500, 'Something went wrong ' + error));
     }
 }
 
-const createOrder = async (jsonOrder) => {
-
-    /**
-     * For each item plus it's extra options
-     * Retrieve all related info
-     * Gradually Build order items
-     */
-    const order = new Order({
-        wayOfPay: jsonOrder.wayOfPay,
-        total: 0,
-        orderContents: [],
-        comments: jsonOrder.comments,
-        deliveryType: jsonOrder.deliveryType,
-        completed: jsonOrder.completed
-    });
-
-    const cartItems = jsonOrder.cartItems;
-    const productQuantityMap = new Map();
-    cartItems.forEach(ci => productQuantityMap.set(ci._id, ci));
-
-
-    for (const cartProduct of cartItems) {
-        try {
-            const databaseProduct = await MenuItem.findById(product._id);
-            const orderEntry = {...databaseProduct};
-            orderEntry.quantity = cartProduct.quantity;
-            delete orderEntry.imgFile;
-
-            if (product.extras) {
-                orderEntry.extraOptions = [];
-                const extraOptions = await ExtraOption.find({
-                    _id: {
-                        '$in': [...product.extras.keys()]
-                    }
-                });
-                jsonOrder.total += cartProduct.quantity * databaseProduct.price;
-                for (const extraOption of extraOptions) {
-                    const orderExtraOption = {...extraOption};
-                    delete orderExtraOption.categories;
-                    orderEntry.extraOptions.push(orderExtraOption);
-                    const extraOptionQuantity = cartProduct.extras.get(extraOption._id);
-                    orderExtraOption.quantity = extraOptionQuantity;
-                    jsonOrder.total += extraOption.price * extraOptionQuantity;
-                }
-                order.orderContents.push(orderEntry);
-            }
-        } catch (error) {
-            throw Error(error);
-        }
-    }
-
-    return order;
-}

@@ -1,38 +1,51 @@
 /**
  * Module Dependencies
  */
-const mongoose = require('mongoose');
 const createError = require('http-errors');
 
-const ExtraOption = require('../models/extra-option');
 const {operationSuccess} = require("../util/common_reponses");
+const ExtraOptionsService = require('../service/extra-options-service');
 
-module.exports.getExtraOptions = (req, res, next) => {
-
+exports.getExtraOptions = async (req, res, next) => {
+    const paginationParams = {
+        page: req.params.page || 1,
+        limit: req.params.limit || 10
+    };
+    try{
+        const resultObject = await ExtraOptionsService.paginate({},paginationParams);
+        operationSuccess(res, resultObject);
+    }catch (error){
+        next(createError(500,'Something went wrong'));
+    }
 }
 
-module.exports.createUpdateExtraOption = async (req, res, next) => {
+exports.createUpdateExtraOption = async (req, res, next) => {
     const jsonExtraOption = req.body.extraOption;
     try {
-        let extraOptionId = jsonExtraOption._id;
-        let message;
-        if(jsonExtraOption._id){
-            extraOptionId = await ExtraOption.updateOne(jsonExtraOption);
-            message = "Option updated";
-        }else{
-            await ExtraOption.create(jsonExtraOption);
-            message = "Option created"
-        }
-        operationSuccess(res, {_id: extraOptionId, message: message});
+        const successCreationObject = await ExtraOptionsService.createUpdateObject(jsonExtraOption, 'Extra Option');
+        operationSuccess(res, successCreationObject);
     }catch(error){
         next(createError(500, 'Creation failed '));
     }
 }
 
-module.exports.getExtraOption = (req, res, next) => {
+exports.getExtraOption = async (req, res, next) => {
+    const extraOptionId = req.params.id;
+    try{
+        const extraOption = await ExtraOptionsService.findById(extraOptionId);
+        operationSuccess(res, {extraOption: extraOption});
+    }catch (error){
+        next(createError(500, 'Creation failed '));
+    }
 
 }
 
-module.exports.deleteExtraOptions = (req, res, next) => {
-
+exports.deleteExtraOptions = async (req, res, next) => {
+    const extraOptionId = req.params.id;
+    try{
+        await ExtraOptionsService.deleteById({_id: extraOptionId});
+        operationSuccess(res, {message: "Extra option deleted"});
+    }catch (error){
+        next(createError(500, 'Delete Failed'));
+    }
 }
