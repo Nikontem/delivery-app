@@ -18,7 +18,7 @@ module.exports = class BasicService {
                 totalItems: totalItems
             };
         } catch (error) {
-            return Error(error);
+            throw Error(error);
         }
     }
 
@@ -35,7 +35,7 @@ module.exports = class BasicService {
             }
             return {_id: menuItemId, message: message};
         }catch (error){
-            return Error(error);
+            throw Error(error);
         }
     }
 
@@ -43,7 +43,7 @@ module.exports = class BasicService {
         try{
             return await this.mongoSchema.findById(extraOptionId);
         }catch (error){
-            return Error(error);
+            throw Error(error);
         }
     }
 
@@ -51,7 +51,7 @@ module.exports = class BasicService {
         try{
             await this.mongoSchema.deleteOne({_id: extraOptionId});
         }catch (error){
-            return Error(error);
+            throw Error(error);
         }
     }
 }

@@ -26,7 +26,7 @@ class OrdersService extends BasicService {
             return {_id: order._id, message: 'Order Placed'};
         } catch (error) {
             await session.abortTransaction();
-            return Error(error);
+            throw Error(error);
         }
     }
 
@@ -34,7 +34,7 @@ class OrdersService extends BasicService {
         try {
             await Order.findOneAndUpdate({_id: orderId}, {status: deliveryStatus.COMPLETED});
         }catch(error){
-           return Error(error);
+            throw Error(error);
         }
     }
 
