@@ -1,7 +1,6 @@
 /**
  * Module Dependencies
  */
-const createError = require('http-errors');
 
 /**
  * Custom Dependencies
