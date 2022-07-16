@@ -1,7 +1,8 @@
+`use strict`;
+
 const BasicService = require('./basic-service');
 const MenuItems = require('../models/menu-item');
 const ExtraOptions = require('../models/extra-option');
-const {json} = require("express");
 
 class MenuItemsService extends BasicService{
     constructor() {
@@ -14,12 +15,11 @@ class MenuItemsService extends BasicService{
 
     async fetchMenuItemWithExtraOptions(menuItemId){
         const menuItem = await MenuItems.findById(menuItemId);
-        const extraOptions = await ExtraOptions.find({
-            "categories" : {
+        menuItem.extraOptions = await ExtraOptions.find({
+            "categories": {
                 $in: [menuItem.category]
             }
         });
-        menuItem.extraOptions = extraOptions;
         return menuItem;
     }
 }

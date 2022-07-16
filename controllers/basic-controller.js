@@ -1,3 +1,5 @@
+`use strict`;
+
 import {validationResult} from "express-validator";
 import createError from "http-errors";
 

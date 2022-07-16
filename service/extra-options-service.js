@@ -1,3 +1,5 @@
+`use strict`;
+
 const BasicService = require('./basic-service');
 const ExtraOption = require("../models/extra-option");
 

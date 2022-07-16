@@ -1,3 +1,5 @@
+`use strict`;
+
 const jwt = require('jsonwebtoken');
 
 const {secretKey} = require('../util/env_params');

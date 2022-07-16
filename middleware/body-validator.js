@@ -1,3 +1,5 @@
+`use strict`;
+
 const {body, param} = require('express-validator');
 
 const User = require('../models/user');
@@ -6,7 +8,7 @@ module.exports.signUpValidator = [
     body('email')
         .isEmail()
         .withMessage('Please enter a valid email')
-        .custom(async (value, {req}) => {
+        .custom(async (value) => {
             const user = await User.findOne({email: value})
             if (user) {
                 return Promise.resolve('E-mail in use');

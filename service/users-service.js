@@ -1,3 +1,5 @@
+`use strict`;
+
 const jwt = require('jsonwebtoken');
 
 const BasicService = require('./basic-service');
@@ -20,13 +22,14 @@ class UsersService extends BasicService {
         checkEmailPassword(verifiedPassword);
         const token = jwt.sign({
                 email: user.email,
+                name: user.name,
                 userId: user._id.toString(),
                 isAdmin: user.isAdmin
             },
             secretKey,
             {expireIn: '1h'}
         );
-
+        return {token};
     }
 }
 

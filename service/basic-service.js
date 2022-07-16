@@ -1,4 +1,4 @@
-const {Error} = require("mongoose");
+`use strict`;
 
 module.exports = class BasicService {
     constructor(mongoSchema) {
