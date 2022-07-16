@@ -5,53 +5,36 @@ module.exports = class BasicService {
         this.mongoSchema = mongoSchema;
     }
 
-    async paginate (filterParams, paginationParams){
-        try {
+    async paginate(filterParams, paginationParams) {
+        const page = paginationParams.page || 1;
+        const perPage = paginationParams.limit || 10;
 
-            const page = paginationParams.page || 1;
-            const perPage = paginationParams.limit || 10;
-
-            const totalItems = await this.mongoSchema.find(filterParams).countDocuments();
-            const results = await this.mongoSchema.find(filterParams).skip((page - 1) * perPage).limit(perPage);
-            return {
-                orders: results,
-                totalItems: totalItems
-            };
-        } catch (error) {
-            throw Error(error);
-        }
+        const totalItems = await this.mongoSchema.find(filterParams).countDocuments();
+        const results = await this.mongoSchema.find(filterParams).skip((page - 1) * perPage).limit(perPage);
+        return {
+            orders: results,
+            totalItems: totalItems
+        };
     }
 
-    async createUpdateObject(jsonObject, objectType){
-        try{
-            let menuItemId = jsonObject._id;
-            let message;
-            if(menuItemId){
-                menuItemId = await this.mongoSchema.updateOne(jsonObject);
-                message = `${objectType} updated`;
-            }else{
-                await this.mongoSchema.create(jsonObject);
-                message = `${objectType} created`;
-            }
-            return {_id: menuItemId, message: message};
-        }catch (error){
-            throw Error(error);
+    async createUpdateObject(dtoObject, objectType) {
+        let menuItemId = dtoObject._id;
+        let message;
+        if (menuItemId) {
+            menuItemId = await this.mongoSchema.updateOne(dtoObject);
+            message = `${objectType} updated`;
+        } else {
+            await this.mongoSchema.create(dtoObject);
+            message = `${objectType} created`;
         }
+        return {_id: menuItemId, message: message};
     }
 
-    async findById(extraOptionId){
-        try{
-            return await this.mongoSchema.findById(extraOptionId);
-        }catch (error){
-            throw Error(error);
-        }
+    async findById(id) {
+        return await this.mongoSchema.findById(id);
     }
 
-    async deleteById(extraOptionId){
-        try{
-            await this.mongoSchema.deleteOne({_id: extraOptionId});
-        }catch (error){
-            throw Error(error);
-        }
+    async deleteById(id) {
+        await this.mongoSchema.deleteOne({_id: id});
     }
 }
